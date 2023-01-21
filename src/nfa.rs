@@ -67,35 +67,35 @@ impl NFAMachine {
         return result + "}";
     }
     // add an ast to current NFA Machine
-    fn add(&mut self, ast: Box<RegexAST>, start: usize, end: usize) {
+    fn add(&mut self, ast: Box<RegexAST>, start_state: usize, end_state: usize) {
         use {RegexAST as AST, NFATransition as T};
         match *ast {
             AST::Chr(x) => {
-                self.digraph[start].push(T::Chr(x, end))
+                self.digraph[start_state].push(T::Chr(x, end_state))
             }
             AST::Any => {
-                self.digraph[start].push(T::Any(end))   
+                self.digraph[start_state].push(T::Any(end_state))   
             }
             AST::Join(x, y) => {
-                self.add(x, start, end);
-                self.add(y, start, end);
+                self.add(x, start_state, end_state);
+                self.add(y, start_state, end_state);
             }
             AST::Cat(x, y) => {
                 self.digraph.push(Vec::new());
-                let (start_x, end_x) = (start, self.digraph.len()-1);
-                let (start_y, end_y) = (self.digraph.len()-1, end);
+                let (start_x, end_x) = (start_state, self.digraph.len()-1);
+                let (start_y, end_y) = (self.digraph.len()-1, end_state);
                 self.add(x, start_x, end_x);
                 self.add(y, start_y, end_y);
             }
             AST::Star(x) => {
-                self.add(x, start, start);
-                if start != end {
-                    self.digraph[start].push(T::Eps(end));
+                self.add(x, start_state, start_state);
+                if start_state != end_state {
+                    self.digraph[start_state].push(T::Eps(end_state));
                 }
             }
             AST::Empty => {
-                if start != end {
-                    self.digraph[start].push(T::Eps(end))
+                if start_state != end_state {
+                    self.digraph[start_state].push(T::Eps(end_state))
                 }
             }
         }
