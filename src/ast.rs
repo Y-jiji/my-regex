@@ -1,3 +1,5 @@
+pub use regex_ops::*;
+
 const T: bool = true;
 const F: bool = false;
 
@@ -6,7 +8,7 @@ pub enum RegexAST {
     // language concatenation
     Cat(Box<RegexAST>, Box<RegexAST>),
     // a char
-    Raw(char),
+    Chr(char),
     // any char
     Any,
     // language join
@@ -18,7 +20,7 @@ pub enum RegexAST {
 }
 
 // helper module, construct regex ast with binary operations
-mod helper {
+mod regex_ops {
     use super::RegexAST;
     impl<T: Into<Self>> std::ops::BitOr<T> for RegexAST {
         type Output = Self;
@@ -44,7 +46,7 @@ mod helper {
     }
     impl From<char> for RegexAST {
         fn from(value: char) -> Self {
-            Self::Raw(value)
+            Self::Chr(value)
         }
     }
     impl std::fmt::Display for RegexAST {
@@ -53,7 +55,7 @@ mod helper {
             match self {
                 Any => f.write_str(".")?,
                 Cat(a, b) => write!(f, "({a})({b})")?,
-                Raw(a) => write!(f, "{a}")?,
+                Chr(a) => write!(f, "{a}")?,
                 Join(a, b) => write!(f, "({a}|{b})")?,
                 Star(a) => write!(f, "({a}*)")?,
                 Empty => write!(f, "ε")?,
